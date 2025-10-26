@@ -24,7 +24,7 @@ char datafilepath_1v1[256];
 int timerDeath[MAXPLAYERS+1];
 int Crowns[MAXPLAYERS+1];
 int Kills[MAXPLAYERS+1];
-bool CvarAnnounce;
+int CvarAnnounce;
 bool Is1v1;
 
 KeyValues g_hData;
@@ -34,7 +34,7 @@ public Plugin myinfo =
 	name = "Top Witch Crowners",
 	description = "Anuncia los crowns a la Witch y los guarda en data/crown_database.txt",
 	author = "Beckham CE (Base: thrillkill, JNC, Harry)",
-	version = "2.4-Crowns",
+	version = "2.5-Crowns",
 	url = ""
 };
 
@@ -54,7 +54,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	hEnablePlugin 			= CreateConVar("crown_database_enable", 			"1", "¿Activar este plugin?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	hCvarAnnounce 			= CreateConVar("crown_database_announce", 			"1", "Anunciar crowns en el chat cuando alguien lo logre.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	hCvarAnnounce 			= CreateConVar("crown_database_announce", 			"3", "Controla qué mensajes se anuncian. Suma los números: 1=Crown exitoso, 2=Crown fallido (solo al jugador), 4=Stats de fin de ronda, 8=Nuevo total al jugador.", FCVAR_NOTIFY, true, 0.0, true, 15.0);
 	g_hCvarModesTog 		= CreateConVar("crown_database_modes_tog",			"0", "Activar el plugin en estos modos de juego. 0=Todos, 1=Coop, 2=Survival, 4=Versus. Sumar números.", FCVAR_NOTIFY, true, 0.0, true, 7.0);
 	g_hCvarSurvivorRequired = CreateConVar("top_crown_survivors_required",		"2", "Número de Supervivientes requeridos como mínimo para activar este plugin", FCVAR_NOTIFY , true, 1.0, true, 32.0);
 	g_hCvarAISurvivor 		= CreateConVar("crown_database_ai_survivor_enable",	"1", "¿Contar crowns de Supervivientes IA? [1: Sí, 0: No]", FCVAR_NOTIFY , true, 0.0, true, 1.0);
@@ -201,7 +201,7 @@ void ConVarChange_hCvarAnnounce(ConVar convar, const char[] oldValue, const char
 
 void GetCvars()
 {
-	CvarAnnounce = hCvarAnnounce.BoolValue;
+	CvarAnnounce = hCvarAnnounce.IntValue;
 }
 
 public void OnMapStart()
@@ -230,7 +230,7 @@ Action Command_Top(int client, int args)
 {
 	if(client == 0) return Plugin_Handled;
 	if(!g_bCvarAllow) return Plugin_Handled;
-
+	
 	PrintTopCrowners(client);
 
 	return Plugin_Handled;
@@ -268,14 +268,14 @@ public void Event_Witch_Killed(Event event, const char[] name, bool dontBroadcas
 		CreateTimer(0.0, Timer_Statistic, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 		CreateTimer(0.1, Timer_PrintTopCrowns, 0, TIMER_FLAG_NO_MAPCHANGE);
 
-		if (CvarAnnounce)
+		if (CvarAnnounce & 1)
 		{
 			CPrintToChatAll("[{green}Top Crowners{default}] {olive}%N {default}realizo un {green}crown {default}a la {lightgreen}Witch%s", client, (g_hCvar1v1Separate.BoolValue && Is1v1) ? " en 1v1." : "!");
 		}
 	}
 	else
 	{
-		if (CvarAnnounce && !IsFakeClient(client))
+		if ((CvarAnnounce & 2) && !IsFakeClient(client))
 		{
 			CPrintToChat(client, "[{green}Top Crowners{default}] Mataste a la {lightgreen}Witch{default}, ¡pero no fue un {green}crown!");
 		}
@@ -330,7 +330,7 @@ void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!g_bRoundEndAnnounce)
 	{
-		if(CvarAnnounce)
+		if(CvarAnnounce & 4)
 			PrintStats();
 		g_bRoundEndAnnounce = true;
 	}
@@ -351,7 +351,7 @@ void PrintStats()
 
 	SortCustom1D(survivor_clients, survivor_index, SortByKillsDesc);
 
-	CPrintToChatAll("{default}------------------------------");
+	CPrintToChatAll("{lightgreen}------------------------------");
 	int frags;
 	int crownscount;
 	for (int i=0;i < survivor_index;++i)
@@ -361,7 +361,7 @@ void PrintStats()
 		crownscount = Crowns[client];
 		PrintToChatAll("\x04%N \x03(Kills: \x01%i \x03| Crowns: \x01%i\x03)", client, frags, crownscount);
 	}
-	CPrintToChatAll("{default}------------------------------");
+	CPrintToChatAll("{lightgreen}------------------------------");
 }
 
 int SortByKillsDesc(int elem1, int elem2, const int[] array, Handle hndl)
@@ -587,7 +587,8 @@ Action Timer_Statistic(Handle timer, int attacker)
 			g_hData.ExportToFile(datafilepath_1v1);
 		else
 			g_hData.ExportToFile(datafilepath);
-		if(CvarAnnounce)
+		
+		if(CvarAnnounce & 8)
 		{
 			CPrintToChat(attacker, "[{green}Top Crowners{default}] ¡Ahora tienes {lightgreen}%d {green}crowns%s", crown, (g_hCvar1v1Separate.BoolValue && Is1v1) ? " en 1v1." : "!");
 		}
@@ -642,7 +643,7 @@ void ShowCrownRank(int client)
 		crown = 0;
 	}
 	int rank = TopTo(crown);
-	CPrintToChat(client, "[{green}Top Crowners{default}] Ranking de {green}Crowns: {lightgreen}%d/%d%s", rank, count, (g_hCvar1v1Separate.BoolValue && Is1v1) ? " en 1v1." : "."); // Renombrado
+	CPrintToChat(client, "[{green}Top Crowners{default}] Ranking de {green}Crowns: {lightgreen}%d/%d%s", rank, count, (g_hCvar1v1Separate.BoolValue && Is1v1) ? " en 1v1." : ".");
 }
 
 int TopTo(int crowni)
