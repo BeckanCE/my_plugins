@@ -12,7 +12,7 @@ ConVar g_hReadyCfgName;
 public Plugin myinfo = 
 {
     name = "[L4D2] Mostrar información al inicio de cada ronda",
-    author = "Beckan (modificado por ChatGPT)",
+    author = "Beckham CE",
     description = "Muestra los equipos, mapa, espectadores y configuración cuando comienza la ronda.",
     version = PLUGIN_VERSION,
     url = ""
@@ -50,7 +50,7 @@ public void OnRoundIsLive()
 
         int team = GetClientTeam(i);
 
-        if (team == 2)  // Supervivientes
+        if (team == 2)
         {
             if (strlen(survivorNames) > 0)
                 StrCat(survivorNames, sizeof(survivorNames), "\x01, ");
@@ -58,7 +58,7 @@ public void OnRoundIsLive()
             StrCat(survivorNames, sizeof(survivorNames), "\x03");
             StrCat(survivorNames, sizeof(survivorNames), playerName);
         }
-        else if (team == 3)  // Infectados
+        else if (team == 3)
         {
             if (strlen(infectedNames) > 0)
                 StrCat(infectedNames, sizeof(infectedNames), "\x01, ");
@@ -68,9 +68,9 @@ public void OnRoundIsLive()
         }
     }
 
-    CPrintToChatAll("{green}> {olive}Mapa{default}: {green}%s", mapName);
-    CPrintToChatAll("{green}> {olive}Supervivientes{default}: {blue}%s", survivorNames);
-    CPrintToChatAll("{green}> {olive}Infectados{default}: {red}%s", infectedNames);
+    CPrintToChatAll("{green}-> {default}Mapa: {green}%s", mapName);
+    CPrintToChatAll("{green}-> {default}Supervivientes: {blue}%s", survivorNames);
+    CPrintToChatAll("{green}-> {default}Infectados: {red}%s", infectedNames);
 
     char spectatorsAndCasters[512];
     spectatorsAndCasters[0] = '\0';
@@ -96,10 +96,9 @@ public void OnRoundIsLive()
 
     if (strlen(spectatorsAndCasters) > 0)
     {
-        CPrintToChatAll("{green}> {olive}Espectadores{default}: {olive}%s", spectatorsAndCasters);
+        CPrintToChatAll("{green}-> {default}Espectadores: {olive}%s", spectatorsAndCasters);
     }
 
-    // Obtener y mostrar el valor actual de la configuración
     char cfgName[64];
     if (g_hReadyCfgName != null)
     {
@@ -110,5 +109,5 @@ public void OnRoundIsLive()
         strcopy(cfgName, sizeof(cfgName), "desconocida");
     }
 
-    CPrintToChatAll("{green}> {olive}Configuración{default}: {green}%s", cfgName);
+    CPrintToChatAll("{green}-> {default}Configuración: {lightgreen}%s", cfgName);
 }
