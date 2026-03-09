@@ -75,7 +75,7 @@ public void OnPluginStart()
 	BuildPath(Path_SM, datafilepath, 256, "data/%s", "crown_database.txt");
 	BuildPath(Path_SM, datafilepath_1v1, 256, "data/%s", "1v1_crown_database.txt");
 	RegConsoleCmd("sm_crowns", Command_Stats, "Muestra tus estadísticas de crowns y tu rango.", 0);
-	RegConsoleCmd("sm_topcrowns", Command_Top, "Muestra el TOP 5 de jugadores con más crowns.", 0);
+	RegConsoleCmd("sm_topw", Command_Top, "Muestra el TOP 5 de jugadores con más crowns.", 0);
 
 	AutoExecConfig(true,"l4d2_crown_database");
 }
