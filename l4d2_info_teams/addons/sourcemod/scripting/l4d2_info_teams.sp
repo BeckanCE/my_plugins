@@ -2,10 +2,12 @@
 #pragma newdecls required
 
 #include <sourcemod>
-#include <readyup>
 #include <multicolors>
 
-#define PLUGIN_VERSION "1.5-mod"
+#undef REQUIRE_PLUGIN
+#include <readyup>
+
+#define PLUGIN_VERSION "1.6-mod"
 
 ConVar g_hReadyCfgName;
 
@@ -13,14 +15,14 @@ public Plugin myinfo =
 {
     name = "[L4D2] Mostrar información al inicio de cada ronda",
     author = "Beckham CE",
-    description = "Muestra los equipos, mapa, espectadores y configuración cuando comienza la ronda.",
+    description = "Muestra los equipos, mapa, espectadores y configuración cuando comienza la ronda (Opcional).",
     version = PLUGIN_VERSION,
     url = ""
 };
 
 public void OnPluginStart()
 {
-    PrintToServer("[Team Info Plugin] Loaded. Version: %s", PLUGIN_VERSION);
+    PrintToServer("[Team Info Plugin] Loaded (Optional Dependency). Version: %s", PLUGIN_VERSION);
     g_hReadyCfgName = FindConVar("l4d_ready_cfg_name");
 }
 
